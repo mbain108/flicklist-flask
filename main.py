@@ -12,7 +12,7 @@ def index():
     tomorrows_movie = get_random_movie()
 
     while tomorrows_movie == movie:
-        tomorrows_movie = get_random_movie()
+        tomorrows_movie = get_random_movie();
 
     # build the response string
     content = "<h1>Movie of the Day</h1>"
