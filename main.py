@@ -11,7 +11,7 @@ def index():
     movie = get_random_movie()
     tomorrows_movie = get_random_movie()
 
-    while tomorrows_movie == movie:
+    while tomorrows_movie == movie: # is
         tomorrows_movie = get_random_movie();
 
     # build the response string
@@ -21,7 +21,7 @@ def index():
     content += "</ul>"
 
     # TODO: pick another random movie, and display it under
-    # the heading "<h1>Tommorrow's Movie</h1>"
+    # the heading "<h1>Tommorrow's Movie</h1>" # argument {0} and {1}
     content += "<h1>Tomorrow's Movie</h1>"
     content += "<ul>"
     content += "<li>" + tomorrows_movie + "</li>"
@@ -34,7 +34,7 @@ def get_random_movie():
     movie_titles = ["The Incredibles", "Toy Story", "The Robinsons", "Get Smart", "Charlie's Angles"];
 
     # TODO: randomly choose one of the movies, and return it
-    position = random.randrange(0, len(movie_titles) - 1);
+    position = random.randrange(0, len(movie_titles) - 1); #randint and choice
 
     return movie_titles[position]
 
