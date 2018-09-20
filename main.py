@@ -40,7 +40,10 @@ movie_list = []
 
 # a form for crossing off watched movies
 crossoff_form = """
-
+<form action="/crossoff" method="post">
+<label>I want to cross off <input type="text" id="crossed-off-movie" name="crossed-off-movie" /> from my Watchlist.</label>
+<input type="submit" value="Cross It Off"/>
+</form>
 """
 
 # TODO:
@@ -48,12 +51,32 @@ crossoff_form = """
 # "Star Wars has been crossed off your watchlist".
 # And create a route above the function definition to receive and handle the request from 
 # your crossoff_form.
+@app.route("/crossoff", methods=['POST'])
 def crossoff_movie():
     crossed_off_movie = request.form['crossed-off-movie']    
+
+    remove_movie_element = "<strike>" + crossed_off_movie + "</strike>"
+    sentence = remove_movie_element + " has been crossed off your Watchlist!"
+    content = page_header + "<p>" + sentence + "</p>" + page_footer
+
+    return content
 
 # TODO:
 # modify the crossoff_form above to use a dropdown (<select>) instead of
 # an input text field (<input type="text"/>)
+
+@app.route("/remove", methods=['POST'])
+def remove_movie():
+    remove_movie = request.form['remove-movie']    
+
+    index = movie_list.index(remove_movie)
+    del movie_list[index]
+
+    remove_movie_element = "<bold>" + remove_movie + "</bold>"
+    sentence = remove_movie_element + " has been removed from your Watchlist!"
+    content = page_header + "<p>" + sentence + "</p>" + page_footer
+    
+    return content
 
 @app.route("/add", methods=['POST'])
 def add_movie():
@@ -81,7 +104,23 @@ def index():
         movie_content += temp.format(movie)
 
     movie_content += "</ul>"
-    content = page_header + movie_content + edit_header + add_form + page_footer
+
+    remove_form = """
+    <form action="/remove" method='POST'>
+    <label>I want to remove """
+
+    remove_form += """<select name="remove-movie" /> """
+
+    temp = "<option value='{0}'>{0}</option>"
+    #loop over movie list
+    for movie in movie_list:
+        remove_form += temp.format(movie)
+
+    remove_form += "</select>from my Watchlist.</label><input type='submit' value='Remove It' /></form>"""
+
+
+
+    content = page_header + movie_content + edit_header + add_form + crossoff_form + remove_form + page_footer
 
     return content
 
