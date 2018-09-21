@@ -64,7 +64,6 @@ terrible_movies = [
     "Starship Troopers"
 ]
 
-
 @app.route("/crossoff", methods=['POST'])
 def crossoff_movie():
     crossed_off_movie = request.form['crossed-off-movie']
@@ -84,19 +83,25 @@ def crossoff_movie():
 
     return content
 
-
 @app.route("/add", methods=['POST'])
 def add_movie():
-    new_movie = request.form['new-movie']
+    movie = request.form['new-movie']
 
     # TODO 
     # 'escape' the user's input so that if they typed HTML, it doesn't mess up our site
-    
-    # TODO 
-    # if the user typed nothing at all, redirect and tell them the error
+    new_movie = cgi.escape(movie)
 
     # TODO 
+    # if the user typed nothing at all, redirect and tell them the error
+    if not new_movie:
+        error = "Please specify the name of the movie you want to add"
+        return redirect('/?error={0}'.format(error))
+    
+    # TODO 
     # if the user wants to add a terrible movie, redirect and tell them not to add it b/c it sucks
+    if new_movie in terrible_movies:
+        error = "Trust me, you don\'t want to add {0} to your Watchlist.".format(new_movie)
+        return redirect('/?error={0}'.format(error))
 
     # build response content
     new_movie_element = "<strong>" + new_movie + "</strong>"
@@ -105,13 +110,13 @@ def add_movie():
 
     return content
 
-
 @app.route("/")
 def index():
     edit_header = "<h2>Edit My Watchlist</h2>"
 
     # if we have an error, make a <p> to display it
     error = request.args.get("error")
+
     if error:
         error_esc = cgi.escape(error, quote=True)
         error_element = '<p class="error">' + error_esc + '</p>'
@@ -121,11 +126,9 @@ def index():
     # combine all the pieces to build the content of our response
     main_content = edit_header + add_form + crossoff_form + error_element
 
-
     # build the response string
     content = page_header + main_content + page_footer
 
     return content
-
 
 app.run()
