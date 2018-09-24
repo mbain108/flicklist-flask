@@ -1,59 +1,13 @@
-from flask import Flask, request, redirect
+from flask import Flask, request, redirect, render_template
 import cgi
 
 app = Flask(__name__)
 
 app.config['DEBUG'] = True      # displays runtime errors in the browser, too
 
-page_header = """
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>FlickList</title>
-    </head>
-    <body>
-        <h1>FlickList</h1>
-"""
-
-page_footer = """
-    </body>
-</html>
-"""
-
-# a form for adding new movies
-add_form = """
-    <form action="/add" method="post">
-        <label>
-            I want to add
-            <input type="text" name="new-movie"/>
-            to my watchlist.
-        </label>
-        <input type="submit" value="Add It"/>
-    </form>
-"""
-
 def get_current_watchlist():
     # returns user's current watchlist--hard coded for now
     return [ "Star Wars", "Minions", "Freaky Friday", "My Favorite Martian" ]
-
-# a form for crossing off watched movies
-# (first we build a dropdown from the current watchlist items)
-crossoff_options = ""
-for movie in get_current_watchlist():
-    crossoff_options += '<option value="{0}">{0}</option>'.format(movie)
-
-crossoff_form = """
-    <form action="/crossoff" method="post">
-        <label>
-            I want to cross off
-            <select name="crossed-off-movie"/>
-                {0}
-            </select>
-            from my watchlist.
-        </label>
-        <input type="submit" value="Cross It Off"/>
-    </form>
-""".format(crossoff_options)
 
 # a list of movies that nobody should have to watch
 terrible_movies = [
@@ -63,7 +17,6 @@ terrible_movies = [
     "Nine Lives",
     "Starship Troopers"
 ]
-
 
 @app.route("/crossoff", methods=['POST'])
 def crossoff_movie():
@@ -80,10 +33,9 @@ def crossoff_movie():
     # if we didn't redirect by now, then all is well
     crossed_off_movie_element = "<strike>" + crossed_off_movie + "</strike>"
     confirmation = crossed_off_movie_element + " has been crossed off your Watchlist."
-    content = page_header + "<p>" + confirmation + "</p>" + page_footer
+    content = "<p>" + confirmation + "</p>"
 
-    return content
-
+    #return content
 
 @app.route("/add", methods=['POST'])
 def add_movie():
@@ -106,31 +58,17 @@ def add_movie():
     # build response content
     new_movie_element = "<strong>" + new_movie_escaped + "</strong>"
     sentence = new_movie_element + " has been added to your Watchlist!"
-    content = page_header + "<p>" + sentence + "</p>" + page_footer
+    content = "<p>" + sentence + "</p>"
 
-    return content
-
+    #return content
 
 @app.route("/")
 def index():
-    edit_header = "<h2>Edit My Watchlist</h2>"
-
-    # if we have an error, make a <p> to display it
     error = request.args.get("error")
-    if error:
-        error_esc = cgi.escape(error, quote=True)
-        error_element = '<p class="error">' + error_esc + '</p>'
-    else:
-        error_element = ''
 
-    # combine all the pieces to build the content of our response
-    main_content = edit_header + add_form + crossoff_form + error_element
+    if not error:
+        error = ''
 
-
-    # build the response string
-    content = page_header + main_content + page_footer
-
-    return content
-
+    return render_template('index.html', error=error, crossoff_movie=get_current_watchlist())
 
 app.run()
