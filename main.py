@@ -5,8 +5,9 @@ import cgi
 app = Flask(__name__)
 app.config['DEBUG'] = True      # displays runtime errors in the browser, too
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://flicklist:MyNewPass@localhost:8889/flicklist'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://flicklist:Rakakshi108@localhost:8889/flicklist'
 app.config['SQLALCHEMY_ECHO'] = True
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
@@ -33,7 +34,7 @@ terrible_movies = [
 
 def get_current_watchlist():
     # returns user's current watchlist -- a list of movies they want to see but haven't yet
-    return [movie.name for movie in Movie.query.all()]
+    return Movie.query.all()
 
 def get_watched_movies():
     # For now, we are just pretending
