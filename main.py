@@ -4,7 +4,7 @@ import cgi
 
 app = Flask(__name__)
 app.config['DEBUG'] = True      # displays runtime errors in the browser, too
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://flicklist:MyNewPass@localhost:8889/flicklist'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://flicklist:Rakakshi108@localhost:8889/flicklist'
 app.config['SQLALCHEMY_ECHO'] = True
 
 db = SQLAlchemy(app)
@@ -15,6 +15,7 @@ class Movie(db.Model):
     watched = db.Column(db.Boolean)
     
     # TODO: add a ratings column to the Movie table
+    ratings = db.Column(db.String(25))
 
     def __init__(self, name):
         self.name = name
@@ -38,7 +39,7 @@ def get_current_watchlist():
 def get_watched_movies():
     # For now, we are just pretending
     # returns the list of movies the user has already watched and crossed off
-    return [ "The Matrix", "The Princess Bride", "Buffy the Vampire Slayer" ]
+    return Movie.query.filter_by(watched=True).all()
 
 # Create a new route called rate_movie which handles a POST request on /rating-confirmation
 @app.route("/rating-confirmation", methods=['POST'])
@@ -58,10 +59,12 @@ def rate_movie():
     # if we didn't redirect by now, then all is well
     
     # TODO: make a persistent change to the model so that you STORE the rating in the database
+    movie.ratings = rating
+    db.session.add(movie)
+    db.session.commit()
     # (Note: the next TODO is in templates/ratings.html)
     
     return render_template('rating-confirmation.html', movie=movie, rating=rating)
-
 
 # Creates a new route called movie_ratings which handles a GET on /ratings
 @app.route("/ratings", methods=['GET'])
