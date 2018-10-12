@@ -4,7 +4,7 @@ import cgi
 
 app = Flask(__name__)
 app.config['DEBUG'] = True      # displays runtime errors in the browser, too
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://flicklist:MyNewPass@localhost:8889/flicklist'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://flicklist:Rakakshi108@localhost:8889/flicklist'
 app.config['SQLALCHEMY_ECHO'] = True
 
 db = SQLAlchemy(app)
@@ -50,6 +50,23 @@ def get_watched_movies():
     return Movie.query.filter_by(watched=True).all()
 
 # TODO 3: Add "/login" GET and POST routes.
+@app.route("/login", methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+        user = User.query.filter_by(email=email).first()
+        
+        if user and user.password == password:
+            session['email'] = email
+            print(session)
+            flash('Logged in')
+            print(session)
+            return redirect('/')
+        else:
+            flash('User password incorrect or user does not exist', 'error')
+
+    return render_template('login.html')
 # TODO 4: Create login template with username and password.
 #         Notice that we've already created a 'login' link in the upper-right corner of the page that'll connect to it.
 
@@ -58,16 +75,30 @@ def register():
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
+        verify = request.form['verify']
+        
         if not is_email(email):
             flash('zoiks! "' + email + '" does not seem like an email address')
             return redirect('/register')
+    
         # TODO 1: validate that form value of 'verify' matches password
+        if (verify != password) or (not verify):
+            flash('zoiks! the passwords do not seem to match')
+            return redirect('/register')
+
         # TODO 2: validate that there is no user with that email already
-        user = User(email=email, password=password)
-        db.session.add(user)
-        db.session.commit()
-        session['user'] = user.email
-        return redirect("/")
+        existing_user = User.query.filter_by(email=email).first()
+
+        if not existing_user:
+            user = User(email=email, password=password)
+            db.session.add(user)
+            db.session.commit()
+            session['user'] = user.email
+        
+            return redirect("/")
+        else:
+            flash('zoiks! "' + email + '" already exists')
+            return redirect('/register') 
     else:
         return render_template('register.html')
 
@@ -110,12 +141,10 @@ def rate_movie():
     db.session.commit()
     return render_template('rating-confirmation.html', movie=movie, rating=rating)
 
-
 # Creates a new route called movie_ratings which handles a GET on /ratings
 @app.route("/ratings", methods=['GET'])
 def movie_ratings():
     return render_template('ratings.html', movies = get_watched_movies())
-
 
 @app.route("/crossoff", methods=['POST'])
 def crossoff_movie():
@@ -160,8 +189,10 @@ def index():
 #         It should contain 'register' and 'login'.
 @app.before_request
 def require_login():
-    if not ('user' in session or request.endpoint == 'register'):
-        return redirect("/register")
+    allowed_routes = ['login', 'register']
+
+    if request.endpoint not in allowed_routes and 'email' not in session:
+        return redirect('/login')
 
 # In a real application, this should be kept secret (i.e. not on github)
 # As a consequence of this secret being public, I think connection snoopers or
