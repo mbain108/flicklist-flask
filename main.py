@@ -53,13 +53,15 @@ crossoff_form = """
 # your crossoff_form.
 @app.route("/crossoff", methods=['POST'])
 def crossoff_movie():
+    nav_bar = """<a href="/">Home</a>"""
+
     crossed_off_movie = request.form['crossed-off-movie']    
 
     remove_movie_element = "<strike>" + crossed_off_movie + "</strike>"
     sentence = remove_movie_element + " has been crossed off your Watchlist!"
     content = page_header + "<p>" + sentence + "</p>" + page_footer
 
-    return content
+    return nav_bar + content
 
 # TODO:
 # modify the crossoff_form above to use a dropdown (<select>) instead of
@@ -67,6 +69,7 @@ def crossoff_movie():
 
 @app.route("/remove", methods=['POST'])
 def remove_movie():
+    nav_bar = """<a href="/">Home</a>"""
     remove_movie = request.form['remove-movie']    
 
     index = movie_list.index(remove_movie)
@@ -76,10 +79,11 @@ def remove_movie():
     sentence = remove_movie_element + " has been removed from your Watchlist!"
     content = page_header + "<p>" + sentence + "</p>" + page_footer
     
-    return content
+    return nav_bar + content
 
 @app.route("/add", methods=['POST'])
 def add_movie():
+    nav_bar = """<a href="/">Home</a>"""
     new_movie = request.form['new-movie']
 
     movie_list.append(new_movie)
@@ -89,7 +93,7 @@ def add_movie():
     sentence = new_movie_element + " has been added to your Watchlist!"
     content = page_header + "<p>" + sentence + "</p>" + page_footer
 
-    return content
+    return nav_bar + content
 
 
 @app.route("/")
@@ -117,8 +121,6 @@ def index():
         remove_form += temp.format(movie)
 
     remove_form += "</select>from my Watchlist.</label><input type='submit' value='Remove It' /></form>"""
-
-
 
     content = page_header + movie_content + edit_header + add_form + crossoff_form + remove_form + page_footer
 
